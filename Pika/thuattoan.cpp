@@ -190,7 +190,7 @@ void makeArr()
 stack<Point> checkX(Point A, Point B) {
   stack<Point> st_A, st_B;
   //nếu 2 ô cùng cột thì ta sẽ xét đường đi theo hàng
-  if(A.y == B.y || arr[A.x][A.y] != arr[B.x][B.y]) return st_A;
+  if(A.y == B.y || arr[A.x][A.y] != arr[B.x][B.y] || arr[A.x][A.y] * arr[B.x][B.y] == 0) return st_A;
   int minX_A = A.x, maxX_A = A.x;
   int minX_B = B.x, maxX_B = B.x;
   for(int i = A.x - 1; i >= 0; --i)
@@ -254,7 +254,7 @@ stack<Point> checkX(Point A, Point B) {
 stack<Point> checkY(Point A, Point B) {
   stack<Point> st_A, st_B;
   //nếu 2 ô cùng hàng thì ta sẽ xét đường đi theo cột
-  if(A.x == B.x || arr[A.x][A.y] != arr[B.x][B.y]) return st_A;
+  if(A.x == B.x || arr[A.x][A.y] != arr[B.x][B.y] || arr[A.x][A.y] * arr[B.x][B.y] == 0) return st_A;
   int minY_A = A.y, maxY_A = A.y;
   int minY_B = B.y, maxY_B = B.y;
   for(int i = A.y - 1; i >= 0; --i)
@@ -455,14 +455,19 @@ void play_game()
   {
     Point turn1 = mouse();
     Point turn2 = mouse();
-    checkPoint(turn1, turn2);
+
+    if(checkX(turn1, turn2).size() != 0 || checkY(turn1, turn2).size() != 0)
+    {
+      checkPoint(turn1, turn2);
+      printMap();
+    }
     if(isGameOver())
     {
       cout << "You are winner!" << endl;
       background("photos/win.png");
       break;
     }
-    printMap();
+
     //SDL_RenderClear(renderer);
 
     //initSDL(window, renderer);

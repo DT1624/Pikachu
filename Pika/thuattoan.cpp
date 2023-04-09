@@ -9,9 +9,9 @@ using namespace std;
 
 const int SCREEN_WIDTH = 1100;
 const int SCREEN_HEIGHT = 750;
-const int row = 12;
-const int collum = 8;
-const int h_w = 70;
+const int row = 18;
+const int collum = 11;
+const int h_w = 50;
 int const_row = 2 * h_w;
 int const_collum = h_w;
 
@@ -60,7 +60,6 @@ void waitUntilKeyPressed()
     SDL_Delay(100);
   }
 }
-
 
 SDL_Texture* loadTexture(string path, SDL_Renderer* renderer){
     SDL_Texture* newTexture = nullptr;
@@ -133,30 +132,7 @@ struct Point
 //đọc mảng từ file đã có
 void makeArr()
 {
-//  ifstream file("matran.txt");
-//  for(int i = 0; i < collum; ++i)
-//  {
-//    for(int j = 0; j < row; ++j)
-//    {
-//      file >> arr[i][j];
-//     // cout << arr[i][j] << " ";
-//    }
-//    //cout << endl;
-//  }
-
   srand(time(NULL));
-
-//  for(int i = 0; i < GAME_ROW; i++)
-//  {
-//    arr[i][0] = 0;
-//    arr[i][GAME_COLUMN - 1] = 0;
-//  }
-//
-//  for(int i = 0; i < GAME_COLUMN; i++)
-//  {
-//    arr[0][i] = 0;
-//    arr[GAME_ROW - 1][i] = 0;
-//  }
 
   vector<Point> point;
   vector<int> val;
@@ -169,15 +145,16 @@ void makeArr()
     }
   }
 
-  for(int i = 1; i < 16; i++)
+  for(int i = 1; i < 25; i++)
   {
-    for(int j = 1; j < 5; j++)
+    for(int j = 1; j < 7; j++)
       {
         val.push_back(i);
       }
   }
 
   random_shuffle(val.begin(), val.end());
+  random_shuffle(point.begin(), point.end());
 
   int n = val.size();
   for(int i = 0; i < n; i++)
@@ -314,16 +291,6 @@ stack<Point> checkY(Point A, Point B) {
   //return true;
 }
 
-//in mảng
-void printBoard()
-{
-  for(int i = 1; i < collum - 2; ++i)
-  {
-    for(int j = 1; j < row - 2; ++j) cout << arr[i][j] << " ";
-    cout << endl;
-  }
-}
-
 //check đường đi giữa 2 điểm
 //nếu có đường đi thì xóa cả 2 ngược lại thì không
 void checkPoint(Point &A, Point &B)
@@ -335,12 +302,10 @@ void checkPoint(Point &A, Point &B)
   if(checkX(A, B).size() != 0)
   {
     s = checkX(A, B);
-    //cout << "s.size1() = " << s.size() << endl;
   }
   else
   {
     s = checkY(A, B);
-    //cout << "s.size2() = " << s.size() << endl;
   }
 
   if(s.size() != 0)
@@ -348,10 +313,6 @@ void checkPoint(Point &A, Point &B)
     arr[A.x][A.y] = 0;
     arr[B.x][B.y] = 0;
   }
-//  while(!s.empty()) {
-//    cout << s.top().x << " " << s.top().y << " " << arr[s.top().x][s.top().y] << endl;
-//    s.pop();
-//  }
 }
 
 //chọn tọa độ của hình
@@ -370,14 +331,12 @@ bool isGameOver() {
     for(int j = 0; j < row; ++j)
     {
       if(arr[i][j] != 0) return false;
-      //cout << arr[i][j] << " ";
     }
-    //cout << endl;
   }
   return true;
 }
 
-//in map sau mỗi bước đi
+//in map tại thời điểm hiên tại
 void printMap()
 {
   SDL_RenderClear(renderer);
@@ -402,7 +361,7 @@ void printMap()
           SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
           SDL_RenderDrawRect(renderer, &rect);
         }
-        string s = "photos/" + to_string(arr[j][i]) + ".png";
+        string s = "photos/" + to_string(arr[j][i]) + ".0.png";
         SDL_Texture *abc = loadTexture(s, renderer);
         SDL_RenderCopy(renderer, abc, NULL, &rect);
       }
@@ -413,6 +372,32 @@ void printMap()
   }
 }
 
+//dùng để in hình ảnh background tại vị trí thay đổi
+void printRect(Point A)
+{
+  SDL_Rect rect;
+  rect.w = h_w;
+  rect.h = h_w;
+
+  rect.x = (A.y - 1) * h_w + const_collum;
+  rect.y = (A.x - 1) * h_w + const_row;
+  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
+  SDL_RenderDrawRect(renderer, &rect);
+  string s = "photos/" + to_string(A.x) + "." + to_string(A.y) + ".png";
+  SDL_Texture *abc = loadTexture(s, renderer);
+  SDL_RenderCopy(renderer, abc, NULL, &rect);
+  SDL_RenderPresent(renderer);
+}
+// chỉ in vị trí có thay đổi
+void printPoint(Point A, Point B)
+{
+  if(arr[A.x][A.y] == 0 && arr[B.x][B.y] == 0)
+  {
+    printRect(A);
+    printRect(B);
+  }
+
+}
 //trả về địa chỉ của con trỏ vừa thực hiện
 Point mouse()
 {
@@ -448,18 +433,17 @@ Point mouse()
 //chạy chương trình
 void play_game()
 {
-  //initSDL(window, renderer);
-  //printBoard();
-
   do
   {
+    //printMap();
     Point turn1 = mouse();
     Point turn2 = mouse();
 
     if(checkX(turn1, turn2).size() != 0 || checkY(turn1, turn2).size() != 0)
     {
       checkPoint(turn1, turn2);
-      printMap();
+      printPoint(turn1, turn2);
+
     }
     if(isGameOver())
     {
@@ -467,41 +451,8 @@ void play_game()
       background("photos/win.png");
       break;
     }
-
-    //SDL_RenderClear(renderer);
-
-    //initSDL(window, renderer);
-//    background("photos/1.png");
-//    SDL_Rect rect;
-//    rect.w = 50;
-//    rect.h = 50;
-//
-//    for(int j = 1; j <= collum - 2; ++ j){
-//      for(int i = 1; i <= row - 2; ++i){
-//        rect.x = (i - 1) * 50 + const_collum;
-//        rect.y = (j - 1) * 50 + const_row;
-//
-//        if(arr[j][i] != 0)
-//        {
-//          if((i + j) % 2 == 1) {
-//            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 0);
-//            SDL_RenderDrawRect(renderer, &rect);
-//          }
-//          else{
-//            SDL_SetRenderDrawColor(renderer, 0, 120, 255, 255);
-//            SDL_RenderDrawRect(renderer, &rect);
-//          }
-//          string s = "photos/" + to_string(arr[j][i]) + ".png";
-//          SDL_Texture *abc = loadTexture("photos/" + to_string(arr[j][i]) + ".png", renderer);
-//          SDL_RenderCopy(renderer, abc, NULL, &rect);
-//        }
-//
-//        SDL_RenderPresent(renderer);
-//      }
-//    }
     if(turn1.x * turn1.y * turn2.x * turn2.y == 0) continue;
   } while(!isGameOver());
-
 }
 
 
@@ -516,7 +467,6 @@ int main(int argc, char* argv[])
 
   makeArr();
   printMap();
-
   play_game();
 
   SDL_RenderPresent(renderer);

@@ -2,7 +2,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_mixer.h>
-#include<SDL_ttf.h>
+#include <SDL_ttf.h>
 #include <ctime>
 
 using namespace std;
@@ -13,10 +13,13 @@ const int row = 18;
 const int collum = 11;
 const int h_w = 50;
 int const_row = 2 * h_w;
-int const_collum = h_w;
+int const_collum = 3 * h_w / 2;
+bool check = true;
 
 const string WINDOW_TITLE = "PIKACHU";
 
+int arr[collum][row] = {0};
+string photos[25];
 SDL_Window* window;
 SDL_Renderer* renderer;
 
@@ -35,7 +38,7 @@ void initSDL(SDL_Window* &window, SDL_Renderer* &renderer)
   if(SDL_Init(SDL_INIT_EVERYTHING) != 0) logSDLError(cout, "SDL_Init", true);
 
   window = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-  //window = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_FULL_DESKTOP);
+  //window = SDL_CreateWindow(WINDOW_TITLE.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_FULLSCREEN_DESKTOP);
   if(window == nullptr) logSDLError(cout, "CreateWindow", true);
 
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
@@ -78,31 +81,126 @@ SDL_Texture* loadTexture(string path, SDL_Renderer* renderer){
     return newTexture;
 }
 
-void renderTexture(SDL_Texture* texture, SDL_Renderer* renderer, int x, int y, int w, int h)
+void loadFont_start()
 {
+	bool isRunning = true;
+	SDL_Event e;
+	TTF_Font* font = NULL;
+	SDL_Surface* surface = NULL;
+	SDL_Texture* texture = NULL;
 
-  SDL_Rect rect;
-  rect.x = x;
-  rect.y = y;
-  rect.w = w;
-  rect.h = h;
-  //SDL_QueryTexture(texture, NULL, NULL, &rect.w, &rect.h);
-  SDL_RenderCopy(renderer, texture, NULL, &rect);
+	//Initialize the truetype font API.
+	if (TTF_Init() < 0)
+	{
+		SDL_Log("%s", TTF_GetError());
+		SDL_Quit();
+	}
+
+	font = TTF_OpenFont("font/verdanab.ttf", 120);
+	SDL_Color fg = {255, 0, 255};
+  string text = "PIKACHU";
+
+	surface = TTF_RenderText_Solid(font, text.c_str(), fg);
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_FreeSurface(surface);
+
+	SDL_Rect srcRest;
+	SDL_Rect desRect;
+
+  TTF_SizeText(font, text.c_str(), &srcRest.w, &srcRest.h);
+	srcRest.x = 0;
+	srcRest.y = 0;
+
+	desRect.x = 260;
+	desRect.y = 300;
+
+	desRect.w = srcRest.w;
+	desRect.h = srcRest.h;
+	//SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+  SDL_RenderCopy(renderer, texture, &srcRest, &desRect);
+  SDL_RenderPresent(renderer);
 }
 
-void renderTexture(SDL_Texture* texture, SDL_Renderer* renderer, int x, int y)
+void loadFont_word(string path, int x, int y)
 {
+	TTF_Font* font = NULL;
+	SDL_Surface* surface = NULL;
+	SDL_Texture* texture = NULL;
 
-  SDL_Rect rect;
-  rect.x = x;
-  rect.y = y;
-  //SDL_QueryTexture(texture, NULL, NULL, &rect.w, &rect.h);
-  SDL_RenderCopy(renderer, texture, NULL, &rect);
+	//Initialize the truetype font API.
+	if (TTF_Init() < 0)
+	{
+		SDL_Log("%s", TTF_GetError());
+		SDL_Quit();
+	}
+
+	font = TTF_OpenFont("font/VNCOOP.ttf", 50);
+	SDL_Color fg = {0, 0, 255};
+  //string text = "PIKACHU";
+
+	surface = TTF_RenderText_Solid(font, path.c_str(), fg);
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_FreeSurface(surface);
+
+	SDL_Rect srcRest;
+	SDL_Rect desRect;
+
+  TTF_SizeText(font, path.c_str(), &srcRest.w, &srcRest.h);
+	srcRest.x = 0;
+	srcRest.y = 0;
+  //cout << srcRest.w << " " << srcRest.h << endl;
+	desRect.x = x;
+	desRect.y = y;
+
+	desRect.w = 130;
+	desRect.h = 50;
+	//SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+  SDL_RenderCopy(renderer, texture, NULL, &desRect);
+  SDL_RenderPresent(renderer);
+}
+
+void loadFont_number(string path, int x, int y)
+{
+	TTF_Font* font = NULL;
+	SDL_Surface* surface = NULL;
+	SDL_Texture* texture = NULL;
+
+	//Initialize the truetype font API.
+	if (TTF_Init() < 0)
+	{
+		SDL_Log("%s", TTF_GetError());
+		SDL_Quit();
+	}
+
+	font = TTF_OpenFont("font/ariblk.ttf", 40);
+	SDL_Color fg = {255, 255, 0};
+  //string text = "PIKACHU";
+
+	surface = TTF_RenderText_Solid(font, path.c_str(), fg);
+	texture = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_FreeSurface(surface);
+
+	SDL_Rect srcRest;
+	SDL_Rect desRect;
+
+  TTF_SizeText(font, path.c_str(), &srcRest.w, &srcRest.h);
+	srcRest.x = 0;
+	srcRest.y = 0;
+  //cout << srcRest.w << " " << srcRest.h << endl;
+	desRect.x = x;
+	desRect.y = y;
+
+	desRect.w = 45;
+	desRect.h = 60;
+	//SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+
+  SDL_RenderCopy(renderer, texture, NULL, &desRect);
+  SDL_RenderPresent(renderer);
 }
 
 void background(const string &file)
 {
-  //initSDL(window, renderer);
   SDL_RenderClear(renderer);
 
   SDL_Texture *background = loadTexture(file.c_str(), renderer);
@@ -111,15 +209,12 @@ void background(const string &file)
     quitSDL(window, renderer);
     //break;
   }
-
+  SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
   SDL_Rect rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
   SDL_RenderCopy(renderer, background, NULL, &rect);
 
   SDL_RenderPresent(renderer);
 }
-
-int arr[collum][row] = {0};
-string photos[25];
 
 //tạo các điểm
 struct Point
@@ -145,19 +240,71 @@ void makeArr()
     }
   }
 
-  for(int i = 1; i < 25; i++)
+  for(int i = 1; i <= 36; i++)
   {
-    for(int j = 1; j < 7; j++)
+    for(int j = 1; j <= 4; j++)
       {
         val.push_back(i);
       }
   }
 
   random_shuffle(val.begin(), val.end());
-  random_shuffle(point.begin(), point.end());
+  random_shuffle(val.begin(), val.end());
+  //random_shuffle(val.begin(), val.end());
+  //random_shuffle(point.begin(), point.end());
 
   int n = val.size();
   for(int i = 0; i < n; i++)
+  {
+      arr[point[i].x][point[i].y] = val[i];
+  }
+//  ifstream file("matran.txt");
+//  for(int i = 1; i <= collum - 2; ++i)
+//  {
+//    for(int j = 1; j <= row - 2; ++j)
+//    {
+//      //file << arr[i][j] << " ";
+//      file >> arr[i][j] ;
+//      //cout << arr[i][j] << " ";
+//    }
+//    //file << endl;
+//    //file >> endl;
+//  }
+////  for(int i = 0; i < collum; ++i)
+////  {
+////    for(int j ; j <= row - 2; ++j)
+////    {
+////      //file >> arr[i][j] ;
+////      cout << arr[i][j];
+////      if(arr[i][j] < 10) cout << "  ";
+////      else cout << " ";
+////    }
+////    cout << endl;
+////  }
+}
+
+
+void random()
+{
+  vector<Point> point;
+  vector<int> val;
+
+  for(int i = 1; i <= collum - 2; i++)
+  {
+    for(int j = 1; j <= row - 2; j++)
+    {
+      if(arr[i][j] > 0)
+      {
+        point.push_back({i, j});
+        val.push_back(arr[i][j]);
+      }
+    }
+  }
+
+  random_shuffle(val.begin(), val.end());
+  random_shuffle(val.begin(), val.end());
+
+  for(int i = 0; i < point.size(); ++i)
   {
       arr[point[i].x][point[i].y] = val[i];
   }
@@ -191,8 +338,10 @@ stack<Point> checkX(Point A, Point B) {
     else break;
   }
   if(minX_A > maxX_B || maxX_A < minX_B) return st_A;
-  bool check1, check2;
-  for(int i = max(A.x, B.x); i >= max(minX_A, minX_B); --i)
+  bool check1;
+  int min_max = min(maxX_A, maxX_B);
+  int max_min = max(minX_A, minX_B);
+  for(int i = min(min_max, max_min); i <= max(min_max, max_min); ++i)
   {
     check1 = true;
     for(int j = min(A.y, B.y) + 1; j <= max(A.y, B.y) - 1; ++j)
@@ -206,25 +355,8 @@ stack<Point> checkX(Point A, Point B) {
     }
     if(st_A.size() != 0) return st_A;
   }
-  for(int i = max(A.x, B.x); i <= min(maxX_A, maxX_B); ++i)
-  {
-    check2 = true;
-    for(int j = min(A.y, B.y) + 1; j <= max(A.y, B.y) - 1; ++j)
-    {
-      if(arr[i][j] != 0) check2 = false;
-    }
-    if(check2)
-    {
-      st_B.push({i, A.y});
-      st_A.push({i, B.y});
-    }
-    if(st_B.size() != 0) return st_B;
-  }
-  //cout << minX_A << " " << maxX_A << " " << minX_B << " " << maxX_B << endl;
-  //cout << st_A.size() << " " << st_B.size() << endl;
   if(st_A.size() != 0) return st_A;
   else return st_B;
-  //return true;
 }
 
 //check các đường đi theo chiều Oy
@@ -255,8 +387,10 @@ stack<Point> checkY(Point A, Point B) {
     else break;
   }
   if(minY_A > maxY_B || maxY_A < minY_B) return st_A;
-  bool check1, check2;
-  for(int i = max(A.y, B.y); i >= max(minY_A, minY_B); --i)
+  bool check1;
+  int min_max = min(maxY_A, maxY_B);
+  int max_min = max(minY_A, minY_B);
+  for(int i = min(min_max, max_min); i <= max(min_max, max_min); ++i)
   {
     check1 = true;
     for(int j = min(A.x, B.x) + 1; j <= max(A.x, B.x) - 1; ++j)
@@ -270,25 +404,8 @@ stack<Point> checkY(Point A, Point B) {
     }
     if(st_A.size() != 0) return st_A;
   }
-  for(int i = max(A.y, B.y); i <= min(maxY_A, maxY_B); ++i)
-  {
-    check2 = true;
-    for(int j = min(A.x, B.x) + 1; j <= max(A.x, B.x) - 1; ++j)
-    {
-      if(arr[j][i] != 0) check2 = false;
-    }
-    if(check2)
-    {
-      st_B.push({A.x, i});
-      st_B.push({B.x, i});
-    }
-    if(st_B.size() != 0) return st_B;
-  }
-  //cout << minY_A << " " << maxY_A << " " << minY_B << " " << maxY_B << endl;
-  //3cout << st_A.size() << " " << st_B.size() << endl;
   if(st_A.size() != 0) return st_A;
   else return st_B;
-  //return true;
 }
 
 //check đường đi giữa 2 điểm
@@ -310,19 +427,46 @@ void checkPoint(Point &A, Point &B)
 
   if(s.size() != 0)
   {
+//    while(!s.empty()) {
+//      cout << s.top().x << " " << s.top().y << endl;
+//      s.pop();
+//    }
     arr[A.x][A.y] = 0;
     arr[B.x][B.y] = 0;
   }
 }
 
-//chọn tọa độ của hình
-Point get_move()
+bool check_Exit_Pair()
 {
-  Point point;
-  cout << "Enter your pick: " ;
-  cin >> point.x >> point.y;
-  return point;
+  vector<Point> point;
+  for(int i = 1; i <= collum - 2; i++)
+  {
+    for(int j = 1; j <= row - 2; j++)
+    {
+      if(arr[i][j] > 0 ) point.push_back({i, j});
+    }
+  }
+
+  for(int i = 0; i < point.size(); i++)
+  {
+    for(int j = i + 1; j < point.size(); j++)
+    {
+      Point A = {point[i].x, point[i].y};
+      Point B = {point[j].x, point[j].y};
+      if(checkX(A, B).size() != 0 || checkY(A, B).size() != 0) return true;;
+    }
+  }
+  return false;
 }
+
+////chọn tọa độ của hình
+//Point get_move()
+//{
+//  Point point;
+//  cout << "Enter your pick: " ;
+//  cin >> point.x >> point.y;
+//  return point;
+//}
 
 //kiểm tra bảng đã hết hay chưa
 bool isGameOver() {
@@ -341,10 +485,11 @@ void printMap()
 {
   SDL_RenderClear(renderer);
   //initSDL(window, renderer);
-  background("photos/background.jpg");
+  background("photos/b1.jpg");
   SDL_Rect rect;
   rect.w = h_w;
   rect.h = h_w;
+
 
   for(int j = 1; j <= collum - 2; ++ j){
     for(int i = 1; i <= row - 2; ++i){
@@ -353,23 +498,116 @@ void printMap()
 
       if(arr[j][i] > 0)
       {
-        if((i + j) % 2 == 1) {
-          SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-          SDL_RenderDrawRect(renderer, &rect);
-        }
-        else{
-          SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-          SDL_RenderDrawRect(renderer, &rect);
-        }
-        string s = "photos/" + to_string(arr[j][i]) + ".0.png";
+        SDL_SetRenderDrawColor(renderer, 223, 103, 83, 0);
+        SDL_RenderFillRect(renderer, &rect);
+
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDrawRect(renderer, &rect);
+
+        SDL_Rect rect1;
+        rect1.w = h_w - 10;
+        rect1.h = h_w - 10;
+        rect1.x = (i - 1) * h_w + const_collum + 5;
+        rect1.y = (j - 1) * h_w + const_row + 5;
+        string s = "1/" + to_string(arr[j][i]) + ".3.png";
         SDL_Texture *abc = loadTexture(s, renderer);
-        SDL_RenderCopy(renderer, abc, NULL, &rect);
+        SDL_RenderCopy(renderer, abc, NULL, &rect1);
+        //SDL_RenderPresent(renderer);
       }
 
-      //SDL_Delay(10);
-      SDL_RenderPresent(renderer);
     }
   }
+  SDL_RenderPresent(renderer);
+  SDL_Rect rect1;
+  rect1.w = h_w;
+  rect1.h = h_w;
+  rect1.x = 200;
+  rect1.y = 600;
+  SDL_SetRenderDrawColor(renderer, 223, 103, 83, 0);
+  SDL_RenderFillRect(renderer, &rect1);
+  SDL_Texture *abc = loadTexture("photos/random.png", renderer);
+  SDL_RenderCopy(renderer, abc, NULL, &rect1);
+
+  loadFont_word("SCORE", 920, 100);
+  loadFont_word("TURN", 920, 260);
+  loadFont_word("MAP", 920, 420);
+  SDL_RenderPresent(renderer);
+}
+
+void print_random()
+{
+  SDL_Rect rect;
+  rect.w = h_w;
+  rect.h = h_w;
+
+
+  for(int j = 1; j <= collum - 2; ++ j){
+    for(int i = 1; i <= row - 2; ++i){
+      rect.x = (i - 1) * h_w + const_collum;
+      rect.y = (j - 1) * h_w + const_row;
+
+      if(arr[j][i] > 0)
+      {
+        SDL_SetRenderDrawColor(renderer, 223, 103, 83, 0);
+        SDL_RenderFillRect(renderer, &rect);
+
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderDrawRect(renderer, &rect);
+
+        SDL_Rect rect1;
+        rect1.w = h_w - 10;
+        rect1.h = h_w - 10;
+        rect1.x = (i - 1) * h_w + const_collum + 5;
+        rect1.y = (j - 1) * h_w + const_row + 5;
+        string s = "1/" + to_string(arr[j][i]) + ".3.png";
+        SDL_Texture *abc = loadTexture(s, renderer);
+        SDL_RenderCopy(renderer, abc, NULL, &rect1);
+      }
+    }
+  }
+  SDL_RenderPresent(renderer);
+}
+//trả về địa chỉ của con trỏ vừa thực hiện
+Point mouse()
+{
+  SDL_Event e;
+  while(SDL_WaitEvent(&e))
+  {
+    if(e.type == SDL_QUIT)
+    {
+      check = false;
+      SDL_Quit();
+      break;
+    }
+    if(e.type == SDL_MOUSEBUTTONUP)
+    {
+      int x = e.button.x;
+      int y = e.button.y;
+      if(x >= 0 && y >= 0 && y <= SCREEN_HEIGHT && x <= SCREEN_WIDTH)
+      {
+        if(x >= 200 && x <= 250 && y >= 600 && y <= 650) {
+          return {11, 4};
+          break;
+        }
+        x -= const_collum;
+        x = (x + h_w - 1) / h_w;
+        y -= const_row;
+        y = (y + h_w - 1) / h_w;
+        if(x >= 1 && y >= 1 && y <= collum - 2 && x <= row - 2 && arr[y][x] > 0)
+        {
+          return {y, x};
+          break;
+        }
+      }
+
+    }
+  }
+}
+
+bool mouse_random(Point A)
+{
+  if(A.x == 11 && A.y == 4) return true;
+  return false;
 }
 
 //dùng để in hình ảnh background tại vị trí thay đổi
@@ -381,13 +619,62 @@ void printRect(Point A)
 
   rect.x = (A.y - 1) * h_w + const_collum;
   rect.y = (A.x - 1) * h_w + const_row;
-  SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-  SDL_RenderDrawRect(renderer, &rect);
+
   string s = "photos/" + to_string(A.x) + "." + to_string(A.y) + ".png";
   SDL_Texture *abc = loadTexture(s, renderer);
   SDL_RenderCopy(renderer, abc, NULL, &rect);
   SDL_RenderPresent(renderer);
 }
+
+void printBefore(Point A)
+{
+  SDL_Rect rect;
+  rect.w = h_w;
+  rect.h = h_w;
+
+  rect.x = (A.y - 1) * h_w + const_collum;
+  rect.y = (A.x - 1) * h_w + const_row;
+
+  SDL_SetRenderDrawColor(renderer, 223, 103, 83, 0);
+  SDL_RenderFillRect(renderer, &rect);
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderDrawRect(renderer, &rect);
+
+  rect.w -= 10;
+  rect.h -= 10;
+  rect.x += 5;
+  rect.y += 5;
+  string s = "1/" + to_string(arr[A.x][A.y]) + ".3.png";
+  SDL_Texture *abc = loadTexture(s, renderer);
+  SDL_RenderCopy(renderer, abc, NULL, &rect);
+  SDL_RenderPresent(renderer);
+}
+
+void printAfter(Point A)
+{
+  SDL_Rect rect;
+  rect.w = h_w;
+  rect.h = h_w;
+
+  rect.x = (A.y - 1) * h_w + const_collum;
+  rect.y = (A.x - 1) * h_w + const_row;
+
+  SDL_SetRenderDrawColor(renderer, 120, 75, 230, 0);
+  SDL_RenderFillRect(renderer, &rect);
+  SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+  SDL_RenderDrawRect(renderer, &rect);
+
+  rect.w -= 10;
+  rect.h -= 10;
+  rect.x += 5;
+  rect.y += 5;
+  string s = "1/" + to_string(arr[A.x][A.y]) + ".3.png";
+  SDL_Texture *abc = loadTexture(s, renderer);
+  SDL_RenderCopy(renderer, abc, NULL, &rect);
+  SDL_RenderPresent(renderer);
+
+}
+
 // chỉ in vị trí có thay đổi
 void printPoint(Point A, Point B)
 {
@@ -398,52 +685,70 @@ void printPoint(Point A, Point B)
   }
 
 }
-//trả về địa chỉ của con trỏ vừa thực hiện
-Point mouse()
+
+
+void printBoard()
 {
-  SDL_Event e;
-  while(SDL_WaitEvent(&e))
+  for(int i = 0; i < collum; ++i)
   {
-    if(e.type == SDL_QUIT)
+    for(int j = 0; j < row; ++j)
     {
-      SDL_Quit();
-      break;
+      cout << arr[i][j] << " ";
+      if(arr[i][j] < 10) cout << "  ";
+      else cout << " ";
     }
-    if(e.type == SDL_MOUSEBUTTONUP)
-    {
-      int x = e.button.x;
-      int y = e.button.y;
-      if(x >= 0 && y >= 0 && y <= SCREEN_HEIGHT && x <= SCREEN_WIDTH)
-      {
-        x -= const_collum;
-        x = (x + h_w - 1) / h_w;
-        y -= const_row;
-        y = (y + h_w - 1) / h_w;
-      }
-      if(x >= 1 && y >= 1 && y <= collum - 2 && x <= row - 2)
-      {
-        return {y, x};
-        break;
-      }
-    }
+    cout << endl;
   }
+  cout << "---------------------------" << endl << endl;
 }
-
-
 //chạy chương trình
 void play_game()
 {
+  int score = 0;
   do
   {
-    //printMap();
+
+    if(!check_Exit_Pair())
+    {
+      random();
+      printMap();
+    }
+    SDL_Rect rect1;
+    rect1.w = 130;
+    rect1.h = 60;
+    rect1.x = 920;
+    rect1.y = 150;
+    //SDL_SetRenderDrawColor(renderer, 223, 103, 83, 0);
+    //SDL_RenderFillRect(renderer, &rect1);
+    SDL_Texture *abc1 = loadTexture("photos/bgr_score.jpg", renderer);
+    SDL_RenderCopy(renderer, abc1, NULL, &rect1);
+    SDL_RenderPresent(renderer);
+    string s_score = to_string(score);
+    loadFont_number(s_score, 960, 150);
     Point turn1 = mouse();
+    if(mouse_random(turn1)) {
+      random();
+      print_random();
+      continue;
+    }
+    else if(check) printAfter(turn1);
     Point turn2 = mouse();
+    if(mouse_random(turn2)) {
+      random();
+      print_random();
+      continue;
+    }
 
     if(checkX(turn1, turn2).size() != 0 || checkY(turn1, turn2).size() != 0)
     {
       checkPoint(turn1, turn2);
       printPoint(turn1, turn2);
-
+      score += 10;
+    }
+    else if(check)
+    {
+      printBefore(turn1);
+      printBefore(turn2);
     }
     if(isGameOver())
     {
@@ -451,10 +756,55 @@ void play_game()
       background("photos/win.png");
       break;
     }
-    if(turn1.x * turn1.y * turn2.x * turn2.y == 0) continue;
   } while(!isGameOver());
 }
 
+void start()
+{
+  SDL_RenderClear(renderer);
+
+  SDL_Texture *background = loadTexture("photos/background_start.png", renderer);
+  SDL_Texture *start= loadTexture("photos/start.png", renderer);
+  if(background == nullptr || start == nullptr) {
+    SDL_DestroyTexture(background);
+    SDL_DestroyTexture(start);
+    quitSDL(window, renderer);
+  }
+
+  SDL_Rect rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+  SDL_RenderCopy(renderer, background, NULL, &rect);
+
+  SDL_Rect rect1;
+  rect1.x = 345;
+  rect1.y = 450;
+  rect1.w = 460;
+  rect1.h = 180;
+  SDL_RenderCopy(renderer, start, NULL, &rect1);
+
+  SDL_RenderPresent(renderer);
+
+  loadFont_start();
+
+  SDL_Event e;
+  while(SDL_WaitEvent(&e))
+  {
+    if(e.type == SDL_QUIT)
+    {
+      SDL_Quit();
+      //break;
+    }
+    if(e.type == SDL_MOUSEBUTTONUP)
+    {
+      int x = e.button.x;
+      int y = e.button.y;
+      if(x >= rect1.x && y >= rect1.y && y <= rect1.y + rect.h && x <= rect1.x + rect1.w)
+      {
+        printMap();
+        play_game();
+      }
+    }
+  }
+}
 
 int main(int argc, char* argv[])
 {
@@ -462,12 +812,9 @@ int main(int argc, char* argv[])
 
   initSDL(window, renderer);
   SDL_RenderClear(renderer);
-  //SDL_SetRenderDrawColor(renderer,255,0,0,255);
-  //SDL_RenderPresent(renderer);
 
   makeArr();
-  printMap();
-  play_game();
+  start();
 
   SDL_RenderPresent(renderer);
 

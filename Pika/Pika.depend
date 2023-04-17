@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1681032093 source:d:\game\pika\thuattoan.cpp
+1681720100 source:d:\game\pika\thuattoan.cpp
 	<bits/stdc++.h>
 	<SDL.h>
 	<SDL_image.h>

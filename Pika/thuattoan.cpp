@@ -310,7 +310,7 @@ void random()
   }
 }
 
-//check các đường đi theo chiều Õ
+//check các đường đi theo chiều Ox
 stack<Point> checkX(Point A, Point B) {
   stack<Point> st_A, st_B;
   //nếu 2 ô cùng cột thì ta sẽ xét đường đi theo hàng
@@ -604,6 +604,35 @@ Point mouse()
   }
 }
 
+int Ox(int n)
+{
+  n = (n) * h_w + const_collum ;
+  return n;
+}
+int Oy(int n)
+{
+  n = (n - 1) * h_w + const_row ;
+  return n;
+}
+void print_Road(Point A, Point B)
+{
+  stack<Point> s;
+  if(checkX(A, B).size() != 0) s = checkX(A, B);
+  else s = checkY(A, B);
+  Point B1 = s.top();
+  s.pop();
+  Point A1 = s.top();
+  //cout << A1.x << " " << A1.y << " " << B1.x << " " << B1.y << endl;
+  SDL_SetRenderDrawColor(renderer, rand() % 256, rand() % 256, rand() % 256, 0);
+
+  SDL_RenderDrawLine(renderer, Oy(A.y), Ox(A.x), Oy(A1.y), Ox(A1.x));
+  SDL_RenderDrawLine(renderer, Oy(A1.y), Ox(A1.x), Oy(B1.y), Ox(B1.x));
+  SDL_RenderDrawLine(renderer, Oy(B.y), Ox(B.x), Oy(B1.y), Ox(B1.x));
+  //SDL_Delay(100);
+  SDL_RenderPresent(renderer);
+  SDL_Delay(200);
+}
+
 bool mouse_random(Point A)
 {
   if(A.x == 11 && A.y == 4) return true;
@@ -686,7 +715,6 @@ void printPoint(Point A, Point B)
 
 }
 
-
 void printBoard()
 {
   for(int i = 0; i < collum; ++i)
@@ -725,6 +753,7 @@ void play_game()
     SDL_RenderPresent(renderer);
     string s_score = to_string(score);
     loadFont_number(s_score, 960, 150);
+
     Point turn1 = mouse();
     if(mouse_random(turn1)) {
       random();
@@ -741,6 +770,8 @@ void play_game()
 
     if(checkX(turn1, turn2).size() != 0 || checkY(turn1, turn2).size() != 0)
     {
+      print_Road(turn1, turn2);
+      SDL_Delay(100);
       checkPoint(turn1, turn2);
       printPoint(turn1, turn2);
       score += 10;
@@ -748,7 +779,7 @@ void play_game()
     else if(check)
     {
       printBefore(turn1);
-      printBefore(turn2);
+      //printBefore(turn2);
     }
     if(isGameOver())
     {
@@ -758,7 +789,7 @@ void play_game()
     }
   } while(!isGameOver());
 }
-
+//màn hình menu vào game
 void start()
 {
   SDL_RenderClear(renderer);

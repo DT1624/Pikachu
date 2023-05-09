@@ -44,12 +44,20 @@ const SDL_Rect MENU_WAIT = {430, 332, 240, 96};
 const SDL_Rect RESUME_WAIT = {430, 462, 240, 96};
 const SDL_Rect RESTART_WAIT = {430, 592, 240, 96};
 
-const SDL_Rect MENU_END = {410, 382, 280, 96};
-const SDL_Rect NEW_END = {410, 502, 280, 96};
-const SDL_Rect QUIT_END = {410, 622, 280, 96};
+const SDL_Rect TITLE_END = {410, 252, 280, 120};
+const SDL_Rect SCORE_END = {490, 350, 120, 90};
+const SDL_Rect MENU_END = {410, 452, 280, 96};
+const SDL_Rect QUIT_END = {410, 572, 280, 96};
+
+const SDL_Rect MENU_LOSE = {410, 382, 280, 96};
+const SDL_Rect NEW_LOSE = {410, 502, 280, 96};
+const SDL_Rect QUIT_LOSE = {410, 622, 280, 96};
 
 const SDL_Rect BACK = {90, 90, 150, 60};
-const SDL_Rect NEXT_LEVEL = {410, 622, 280, 96};
+
+const SDL_Rect MENU_WIN = {410, 502, 280, 96};
+const SDL_Rect NEW_WIN = {410, 622, 280, 96};
+const SDL_Rect NEXT_LEVEL_WIN = {410, 622, 280, 96};
 
 const int const_row = 4 * h_w; // khoảng cách Map với lề trái
 const int const_column = 3 * h_w / 2; // khoảng cách Map với lề trên
@@ -63,7 +71,7 @@ int arr[column][row] = {0}; // ma trận map
 int rank_score[11] = {0}; // lưu trữ bảng điểm
 
 int score = 0; // Điểm nhận được
-int level = 5; // level bắt đầu
+int level = 1; // level bắt đầu
 int sound = 0; // âm thanh đang mở (1 là âm thanh đang tắt)
 int chance = 10; // số lượt thay đổi vị trí Map hiện tại
 int time_level[10] = {0, 600, 620, 640, 660, 680, 700, 720, 740, 760};
@@ -71,26 +79,22 @@ int time_level[10] = {0, 600, 620, 640, 660, 680, 700, 720, 740, 760};
 //menu
 bool menu = true;
 bool menu_score = false;
-//bool menu_play = false;
 bool menu_intro = false;
 bool menu_back = false;
 
 // Trong game
 bool game = false; // == menu_play
-//bool game_main = false; // == wait
 bool game_change = false;
 bool game_win = false; // qua màn
 bool game_lose = false; // khi thua
 
 bool wait = false;
 bool wait_resume = false; // == game
-//bool wait_restart = false; // == new_game
 
 //sau khi win hoặc lose
-//bool end_menu = false; // == menu
-//bool end_new = false; // == new_game
-//bool end_quit = false; //== quit_game
+
 bool end_game = false; // true khi win tất cả
+bool end_game2 = false;
 
 bool new_game = false;
 bool quit_game = false;
@@ -118,6 +122,9 @@ void reset_Game()
     game_win = false;
     game_lose = false;
 
+    end_game = false;
+    end_game2 = false;
+
     first_Check = false;
     second_Check = true;
 
@@ -135,6 +142,7 @@ void reset_Next_Level()
     game_win = false;
     game_lose = false;
     end_game = false;
+    end_game2 = false;
 
     first_Check = false;
     second_Check = true;
@@ -327,15 +335,15 @@ void load_Font(string path, int x, int y, int w, int h, SDL_Color c)
 
 void background(const string &file)
 {
-    SDL_RenderClear(renderer);
-
-    SDL_Texture *background = loadTexture(file.c_str(), renderer);
-    SDL_Rect rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
-    //SDL_Rect rect = {75, 100, 875, 550};
-    SDL_RenderCopy(renderer, background, NULL, &rect);
+    renderTexture(file, FULL_SCREEN.x, FULL_SCREEN.y, FULL_SCREEN.w, FULL_SCREEN.h);
+//    SDL_RenderClear(renderer);
+//
+//    SDL_Texture *background = loadTexture(file.c_str(), renderer);
+//    SDL_Rect rect = {0, 0, SCREEN_WIDTH, SCREEN_HEIGHT};
+//    SDL_RenderCopy(renderer, background, NULL, &rect);
 
     SDL_RenderPresent(renderer);
-    SDL_DestroyTexture(background);
+    //SDL_DestroyTexture(background);
 }
 
 int convertX(int n)
@@ -566,7 +574,7 @@ bool check_Exit_Pair()
             Point B = {point[j].x, point[j].y};
             if(checkXY(A, B).size() != 0)
             {
-                cout << A.x << " " << A.y << " " << B.x << " " << B.y << endl;
+                //cout << A.x << " " << A.y << " " << B.x << " " << B.y << endl;
                 return true;;
             }
         }
@@ -588,7 +596,7 @@ bool is_Game_Over()
     return true;
 }
 
-void print_Road(Point A, Point B, int n)
+void print_Road(Point A, Point B)
 {
     pair<Point, Point> p = point_Road(A, B);
 
@@ -596,7 +604,6 @@ void print_Road(Point A, Point B, int n)
     Point A1 = p.first;
 
     SDL_SetRenderDrawColor(renderer, 204, 21, 16, 2);
-    //cout << A.x << " " << A.y << " " << B.x << " " << B.y << " " << A1.x << " " << A1.y << "  " << B1.x << " " << B1.y << endl;
 
     SDL_RenderDrawLine(renderer, Ox(A.y), Oy(A.x), Ox(A1.y), Oy(A1.x));
     SDL_RenderDrawLine(renderer, Ox(A1.y), Oy(A1.x), Ox(B1.y), Oy(B1.x));
@@ -609,9 +616,6 @@ void print_Road(Point A, Point B, int n)
     SDL_RenderDrawLine(renderer, Ox(A.y) - 1, Oy(A.x) - 1, Ox(A1.y) - 1, Oy(A1.x) - 1);
     SDL_RenderDrawLine(renderer, Ox(A1.y) - 1, Oy(A1.x) - 1, Ox(B1.y) - 1, Oy(B1.x) - 1);
     SDL_RenderDrawLine(renderer, Ox(B.y) - 1, Oy(B.x) - 1, Ox(B1.y) - 1, Oy(B1.x) - 1);
-
-    //SDL_RenderPresent(renderer);
-    //SDL_Delay(300 - n * 30);
 }
 
 void print_Box(Point A)
@@ -743,6 +747,15 @@ void print_Map()
     renderTexture("photos/main.png", MAIN_GAME.x, MAIN_GAME.y, MAIN_GAME.w, MAIN_GAME.h);
     if(sound == 0) renderTexture("photos/mix.png", SOUND_GAME.x, SOUND_GAME.y, SOUND_GAME.w, SOUND_GAME.h);
     else renderTexture("photos/no_mix.png", SOUND_GAME.x, SOUND_GAME.y, SOUND_GAME.w, SOUND_GAME.h);
+
+    load_Font("SCORE", 940, 190, 130, 70, PURPLE_COLOR);
+    load_Font(to_string(score), 955, 250, 100, 70, YELLOW_COLOR);
+
+    load_Font("CHANCE", 930, 350, 150, 70, PURPLE_COLOR);
+    load_Font(to_string(chance), 985, 410, 40, 70, YELLOW_COLOR);
+
+    load_Font("LEVEL", 940, 510, 130, 70, PURPLE_COLOR);
+    load_Font(to_string(level), 985, 570, 40, 70, YELLOW_COLOR);
 }
 
 void lv(Point A, Point B, int n)
@@ -1197,26 +1210,19 @@ void lv(Point A, Point B, int n)
 void push_Score()
 {
     ifstream f("highscore.txt");
-//    if(f.is_open()) cout << "yes" << 2 << endl;
-//    else cout << "no" << 2 << endl;
     for(int i = 0; i < 11; ++i)
     {
         f >> rank_score[i];
-        //cout << rank_score[i] << " ";
     }
     f.close();
     ofstream file("highscore.txt");
-//    if(file.is_open()) cout << "yes" << 1 << endl;
-//    else cout << "no" << 1 << endl;
 
     rank_score[10] = max(rank_score[10], score);
     sort(rank_score, rank_score + 11);
     reverse(rank_score, rank_score + 11);
     for(int i = 0; i < 11; ++i)
     {
-        //file << rank_score[i];
         file << rank_score[i] << endl;
-        //cout << rank_score[i] << " ";
     }
     file.close();
 
@@ -1225,7 +1231,6 @@ void push_Score()
 bool return_Mouse(int x, int y, SDL_Rect rect)
 {
     return (x >= rect.x && x <= rect.x + rect.w && y >= rect.y && y <= rect.y + rect.h);
-    //return false;
 }
 
 bool return_Mouse1(int x, int y, SDL_Rect rect)
@@ -1244,7 +1249,7 @@ void mouse()
         SDL_Quit();
         quit_game = true;
     }
-    else if(e.type == SDL_MOUSEBUTTONUP)
+    if(e.type == SDL_MOUSEBUTTONUP)
     {
         int x = e.button.x;
         int y = e.button.y;
@@ -1307,8 +1312,6 @@ void mouse()
         //đang trong game
         else if(game)
         {
-
-
             if(return_Mouse(x, y, MAIN_GAME))
             {
                 wait = true;
@@ -1355,43 +1358,38 @@ void mouse()
             }
         }
 
-        else if(end_game)
+        else if(end_game2)
         {
             if(return_Mouse(x, y, MENU_END))
             {
                 menu = true;
-            }
-
-            if(return_Mouse(x, y, NEW_END))
-            {
-                new_game = true;
-                game = true;
+                end_game2 = false;
             }
 
             if(return_Mouse(x, y, QUIT_END))
             {
                 quit_game = true;
+                end_game2 = false;
             }
-            end_game = false;
         }
 
 
         else if(game_win)
         {
-            if(return_Mouse(x, y, MENU_END))
+            if(return_Mouse(x, y, MENU_WIN))
             {
                 menu = true;
                 game_win = false;
             }
 
-            if(return_Mouse(x, y, NEW_END))
+            if(return_Mouse(x, y, NEW_WIN))
             {
                 new_game = true;
                 game = true;
                 game_win = false;
             }
 
-            if(return_Mouse(x, y, NEXT_LEVEL))
+            if(return_Mouse(x, y, NEXT_LEVEL_WIN))
             {
                 reset_Next_Level();
                 makeArr();
@@ -1405,23 +1403,24 @@ void mouse()
 
         else if(game_lose)
         {
-            if(return_Mouse(x, y, MENU_END))
+            if(return_Mouse(x, y, MENU_LOSE))
             {
                 menu = true;
             }
 
-            if(return_Mouse(x, y, NEW_END))
+            if(return_Mouse(x, y, NEW_LOSE))
             {
                 new_game = true;
                 game = true;
             }
 
-            if(return_Mouse(x, y, QUIT_END))
+            if(return_Mouse(x, y, QUIT_LOSE))
             {
                 quit_game = true;
             }
             game_lose = false;
         }
+        game_lose = false;
     }
 }
 
@@ -1474,89 +1473,47 @@ void print_END()
 {
     SDL_RenderClear(renderer);
     renderTexture("photos/youwin.png", FULL_SCREEN.x, FULL_SCREEN.y, FULL_SCREEN.w, FULL_SCREEN.h);
+
+    load_Font("YOUR SCORE", TITLE_END.x, TITLE_END.y, TITLE_END.w, TITLE_END.h, PURPLE_COLOR);
+    load_Font(to_string(score), SCORE_END.x, SCORE_END.y, SCORE_END.w, SCORE_END.h, BLUE_COLOR);
+
     renderTexture("photos/menu_end.png", MENU_END.x, MENU_END.y, MENU_END.w, MENU_END.h);
-    renderTexture("photos/new_end.png", NEW_END.x, NEW_END.y, NEW_END.w, NEW_END.h);
+
     renderTexture("photos/quit_end.png", QUIT_END.x, QUIT_END.y, QUIT_END.w, QUIT_END.h);
 
 }
 void print_LOSE()
 {
     renderTexture("photos/youlose.png", FULL_SCREEN.x, FULL_SCREEN.y, FULL_SCREEN.w, FULL_SCREEN.h);
-    renderTexture("photos/menu_end.png", MENU_END.x, MENU_END.y, MENU_END.w, MENU_END.h);
-    renderTexture("photos/new_end.png", NEW_END.x, NEW_END.y, NEW_END.w, NEW_END.h);
-    renderTexture("photos/quit_end.png", QUIT_END.x, QUIT_END.y, QUIT_END.w, QUIT_END.h);
+    renderTexture("photos/menu_end.png", MENU_LOSE.x, MENU_LOSE.y, MENU_LOSE.w, MENU_LOSE.h);
+    renderTexture("photos/new_end.png", NEW_LOSE.x, NEW_LOSE.y, NEW_LOSE.w, NEW_LOSE.h);
+    renderTexture("photos/quit_end.png", QUIT_LOSE.x, QUIT_LOSE.y, QUIT_LOSE.w, QUIT_LOSE.h);
 }
 
 void print_NEXT_LEVEL()
 {
     SDL_RenderClear(renderer);
     renderTexture("photos/youwin.png", FULL_SCREEN.x, FULL_SCREEN.y, FULL_SCREEN.w, FULL_SCREEN.h);
-    renderTexture("photos/menu_end.png", MENU_END.x, MENU_END.y, MENU_END.w, MENU_END.h);
-    renderTexture("photos/new_end.png", NEW_END.x, NEW_END.y, NEW_END.w, NEW_END.h);
-    renderTexture("photos/next_level.png", NEXT_LEVEL.x, NEXT_LEVEL.y, NEXT_LEVEL.w, NEXT_LEVEL.h);
+    renderTexture("photos/menu_end.png", MENU_WIN.x, MENU_WIN.y, MENU_WIN.w, MENU_WIN.h);
+    renderTexture("photos/new_end.png", NEW_WIN.x, NEW_WIN.y, NEW_WIN.w, NEW_WIN.h);
+    renderTexture("photos/next_level.png", NEXT_LEVEL_WIN.x, NEXT_LEVEL_WIN.y, NEXT_LEVEL_WIN.w, NEXT_LEVEL_WIN.h);
 }
 
 void Render()
 {
     if(new_game)
     {
-        push_Score();
+        //push_Score();
         reset_Game();
         makeArr();
         print_Map();
         new_game = false;
     }
 
-    if(end_game)
-    {
-        //push_Score();
-        //end_game = false;
-        print_END();
-    }
-    if(game_win)
-    {
-        //game_win = false;
-        print_NEXT_LEVEL();
-    }
-
-    if(game_lose)
-    {
-        //push_Score();
-        //game_lose = false;
-        print_LOSE();
-    }
-
-    if(menu)
-    {
-        //reset_Game();
-        print_MENU();
-    }
-
-    if(menu_score)
-    {
-        SDL_RenderClear(renderer);
-        print_RANK();
-        menu_score = false;
-        menu_back = true;
-    }
-
-    if(menu_intro)
-    {
-        print_INTRO();
-        menu_back = true;
-
-    }
-
     if(game)
     {
         if(!new_game)
         {
-            load_Font("SCORE", 930, 190, 130, 70, PURPLE_COLOR);
-            load_Font(to_string(score), 945, 250, 100, 70, YELLOW_COLOR);
-            load_Font("CHANCE", 930, 350, 130, 70, PURPLE_COLOR);
-            load_Font(to_string(chance), 960, 410, 70, 70, YELLOW_COLOR);
-            load_Font("LEVEL", 930, 510, 130, 70, PURPLE_COLOR);
-            load_Font(to_string(level), 960, 570, 70, 70, YELLOW_COLOR);
 
         }
         //print_Map();
@@ -1565,12 +1522,16 @@ void Render()
             if(checkXY(first_Move, second_Move).size() != 0)
             {
                 score += 10 + (level - 1) * 2;
+                load_Font("SCORE", 940, 190, 130, 70, PURPLE_COLOR);
+                load_Font(to_string(score), 955, 250, 100, 70, YELLOW_COLOR);
+
                 sound_Delete();
-                print_Road(first_Move, second_Move, level);
-                SDL_Delay(100);
+                print_Road(first_Move, second_Move);
+                //SDL_Delay(100);
                 SDL_RenderPresent(renderer);
                 print_Road_Box(first_Move, second_Move);
                 lv(first_Move, second_Move, level);
+                SDL_RenderPresent(renderer);
             }
             else
             {
@@ -1604,6 +1565,7 @@ void Render()
         {
             if(chance == 0)
             {
+                push_Score();
                 game_lose = true;
                 game = false;
             }
@@ -1612,6 +1574,8 @@ void Render()
                 chance--;
                 random();
                 print_Random();
+                load_Font("CHANCE", 930, 350, 150, 70, PURPLE_COLOR);
+                load_Font(to_string(chance), 985, 410, 40, 70, YELLOW_COLOR);
             }
         }
 
@@ -1621,10 +1585,50 @@ void Render()
             print_Random();
             game_change = false;
             chance--;
+            load_Font("CHANCE", 930, 350, 150, 70, PURPLE_COLOR);
+            load_Font(to_string(chance), 985, 410, 40, 70, YELLOW_COLOR);
             first_Check = false;
             second_Check = true;
         }
 
+
+    }
+
+    if(end_game)
+    {
+        push_Score();
+        print_END();
+        end_game = false;
+        end_game2 = true;
+    }
+
+    if(game_win)
+    {
+        print_NEXT_LEVEL();
+    }
+
+    if(game_lose)
+    {
+        print_LOSE();
+    }
+
+    if(menu)
+    {
+        print_MENU();
+    }
+
+    if(menu_score)
+    {
+        SDL_RenderClear(renderer);
+        print_RANK();
+        menu_score = false;
+        menu_back = true;
+    }
+
+    if(menu_intro)
+    {
+        print_INTRO();
+        menu_back = true;
 
     }
 
@@ -1651,6 +1655,8 @@ int main(int argc, char* argv[])
     Uint32 frameStart;
     int frameTime;
 
+    makeArr();
+
     while(!quit_game)
     {
         frameStart = SDL_GetTicks();
@@ -1658,11 +1664,10 @@ int main(int argc, char* argv[])
         Render();
         mouse();
 
-
-
+        SDL_RenderPresent(renderer);
         frameTime = SDL_GetTicks() - frameStart;
 
-        SDL_RenderPresent(renderer);
+
 
         if(FRAME_DELAY > frameTime)
         {

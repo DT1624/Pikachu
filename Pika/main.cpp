@@ -55,8 +55,8 @@ const SDL_Rect QUIT_LOSE = {410, 622, 280, 96};
 
 const SDL_Rect BACK = {90, 90, 150, 60};
 
-const SDL_Rect MENU_WIN = {410, 502, 280, 96};
-const SDL_Rect NEW_WIN = {410, 622, 280, 96};
+const SDL_Rect MENU_WIN = {410, 382, 280, 96};
+const SDL_Rect NEW_WIN = {410, 502, 280, 96};
 const SDL_Rect NEXT_LEVEL_WIN = {410, 622, 280, 96};
 
 const int const_row = 4 * h_w; // khoảng cách Map với lề trái
@@ -135,7 +135,7 @@ void reset_Game()
 void reset_Next_Level()
 {
     level += 1;
-    chance = max(chance + 1, 10);
+    chance = min(chance + 1, 10);
 
     game = true;
     game_change = false;
@@ -1503,6 +1503,7 @@ void Render()
 {
     if(new_game)
     {
+        //cout << 1 << endl;
         //push_Score();
         reset_Game();
         makeArr();
@@ -1512,6 +1513,7 @@ void Render()
 
     if(game)
     {
+        //cout << 2 << endl;
         if(!new_game)
         {
 
@@ -1542,7 +1544,8 @@ void Render()
                     sound_NoDelete();
                 }
             }
-
+            first_Move = {0, 0};
+            second_Move = {0, 0};
             tmp1 = {0, 0};
             tmp2 = {0, 0};
         }
@@ -1596,6 +1599,7 @@ void Render()
 
     if(end_game)
     {
+        //cout << 3 << endl;
         push_Score();
         print_END();
         end_game = false;
@@ -1604,21 +1608,25 @@ void Render()
 
     if(game_win)
     {
+        //cout << 4 << endl;
         print_NEXT_LEVEL();
     }
 
     if(game_lose)
     {
+        //cout << 5 << endl;
         print_LOSE();
     }
 
     if(menu)
     {
+        //cout << 6 << endl;
         print_MENU();
     }
 
     if(menu_score)
     {
+        //cout << 7 << endl;
         SDL_RenderClear(renderer);
         print_RANK();
         menu_score = false;
@@ -1627,6 +1635,7 @@ void Render()
 
     if(menu_intro)
     {
+       // cout << 8 << endl;
         print_INTRO();
         menu_back = true;
 
@@ -1634,11 +1643,13 @@ void Render()
 
     if(wait)
     {
+        //cout << 9 << endl;
         print_WAIT();
     }
 
     if(wait_resume)
     {
+        //cout << 10 << endl;
         print_Map();
         wait_resume = false;
         wait = false;

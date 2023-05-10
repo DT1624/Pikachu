@@ -15,7 +15,6 @@
 //const int FPS = 60;
 //const int FRAME_DELAY = 16; // độ trễ
 //const int levelMax = 9; // số level tối đa
-//const int time_of_level = 600; //thời gian chuẩn mỗi level
 //const string WINDOW_TITLE = "PIKACHU";
 //
 //const SDL_Color CYAN_COLOR = {0, 255, 255};
@@ -54,9 +53,10 @@
 //const SDL_Rect QUIT_LOSE = {410, 622, 280, 96};
 //
 //const SDL_Rect BACK = {90, 90, 150, 60};
+//const SDL_Rect TIME = {95, 120, 760, 30};
 //
-//const SDL_Rect MENU_WIN = {410, 502, 280, 96};
-//const SDL_Rect NEW_WIN = {410, 622, 280, 96};
+//const SDL_Rect MENU_WIN = {410, 382, 280, 96};
+//const SDL_Rect NEW_WIN = {410, 502, 280, 96};
 //const SDL_Rect NEXT_LEVEL_WIN = {410, 622, 280, 96};
 //
 //const int const_row = 4 * h_w; // khoảng cách Map với lề trái
@@ -74,6 +74,10 @@
 //int level = 1; // level bắt đầu
 //int sound = 0; // âm thanh đang mở (1 là âm thanh đang tắt)
 //int chance = 10; // số lượt thay đổi vị trí Map hiện tại
+//
+//int time_start = 0;
+//int time_now = 0;
+//
 //int time_level[10] = {0, 600, 620, 640, 660, 680, 700, 720, 740, 760};
 //
 ////menu
@@ -116,6 +120,7 @@
 //    level = 1;
 //    sound = 0;
 //    chance = 10;
+//    time_start = SDL_GetTicks();
 //
 //    game = true;
 //    game_change = false;
@@ -134,8 +139,10 @@
 //
 //void reset_Next_Level()
 //{
+//    score += (time_level[level] - time_now / 1000) * (2 * level + 5) / 10;
 //    level += 1;
-//    chance = max(chance + 1, 10);
+//    chance = min(chance + 1, 10);
+//    time_start = SDL_GetTicks();
 //
 //    game = true;
 //    game_change = false;
@@ -748,14 +755,14 @@
 //    if(sound == 0) renderTexture("photos/mix.png", SOUND_GAME.x, SOUND_GAME.y, SOUND_GAME.w, SOUND_GAME.h);
 //    else renderTexture("photos/no_mix.png", SOUND_GAME.x, SOUND_GAME.y, SOUND_GAME.w, SOUND_GAME.h);
 //
-//    load_Font("SCORE", 930, 190, 130, 70, PURPLE_COLOR);
-//    load_Font(to_string(score), 945, 250, 100, 70, YELLOW_COLOR);
+//    load_Font("SCORE", 940, 190, 130, 70, PURPLE_COLOR);
+//    load_Font(to_string(score), 955, 250, 100, 70, YELLOW_COLOR);
 //
-//    load_Font("CHANCE", 920, 350, 150, 70, PURPLE_COLOR);
-//    load_Font(to_string(chance), 975, 410, 40, 70, YELLOW_COLOR);
+//    load_Font("CHANCE", 930, 350, 150, 70, PURPLE_COLOR);
+//    load_Font(to_string(chance), 985, 410, 40, 70, YELLOW_COLOR);
 //
-//    load_Font("LEVEL", 930, 510, 130, 70, PURPLE_COLOR);
-//    load_Font(to_string(level), 975, 570, 40, 70, YELLOW_COLOR);
+//    load_Font("LEVEL", 940, 510, 130, 70, PURPLE_COLOR);
+//    load_Font(to_string(level), 985, 570, 40, 70, YELLOW_COLOR);
 //}
 //
 //void lv(Point A, Point B, int n)
@@ -1300,6 +1307,7 @@
 //            }
 //            if(return_Mouse(x, y, RESTART_WAIT))
 //            {
+//                push_Score();
 //                game = true;
 //                new_game = true;
 //                first_Check = false;
@@ -1397,7 +1405,6 @@
 //                game = true;
 //                game_win = false;
 //            }
-//            //if(!game_win) push_Score();
 //        }
 //
 //
@@ -1406,21 +1413,22 @@
 //            if(return_Mouse(x, y, MENU_LOSE))
 //            {
 //                menu = true;
+//                game_lose = false;
 //            }
 //
 //            if(return_Mouse(x, y, NEW_LOSE))
 //            {
 //                new_game = true;
 //                game = true;
+//                game_lose = false;
 //            }
 //
 //            if(return_Mouse(x, y, QUIT_LOSE))
 //            {
 //                quit_game = true;
+//                game_lose = false;
 //            }
-//            game_lose = false;
 //        }
-//        game_lose = false;
 //    }
 //}
 //
@@ -1503,27 +1511,32 @@
 //{
 //    if(new_game)
 //    {
+//        //cout << 1 << endl;
 //        //push_Score();
-//        reset_Game();
 //        makeArr();
+//        reset_Game();
 //        print_Map();
 //        new_game = false;
 //    }
 //
 //    if(game)
 //    {
-//        if(!new_game)
+//        if(!wait) time_now = SDL_GetTicks() - time_start;
+//        if(time_level[level] - time_now / 1000 < 0)
 //        {
-//
+//            game = false;
+//            game_lose = true;
 //        }
-//        //print_Map();
-//        if(second_Check && arr[first_Move.x][first_Move.y] * arr[second_Move.x][second_Move.y] > 0)
+//        renderTexture("photos/sky.png", TIME.x, TIME.y, TIME.w, TIME.h);
+//        renderTexture("photos/time.png", TIME.x, TIME.y, max(0, TIME.w * (time_level[level] - time_now / 1000) / time_level[level]), TIME.h);
+//
+//        if(game && second_Check && arr[first_Move.x][first_Move.y] * arr[second_Move.x][second_Move.y] > 0)
 //        {
 //            if(checkXY(first_Move, second_Move).size() != 0)
 //            {
 //                score += 10 + (level - 1) * 2;
-//                load_Font("SCORE", 930, 190, 130, 70, PURPLE_COLOR);
-//                load_Font(to_string(score), 945, 250, 100, 70, YELLOW_COLOR);
+//                load_Font("SCORE", 940, 190, 130, 70, PURPLE_COLOR);
+//                load_Font(to_string(score), 955, 250, 100, 70, YELLOW_COLOR);
 //
 //                sound_Delete();
 //                print_Road(first_Move, second_Move);
@@ -1542,7 +1555,8 @@
 //                    sound_NoDelete();
 //                }
 //            }
-//
+//            first_Move = {0, 0};
+//            second_Move = {0, 0};
 //            tmp1 = {0, 0};
 //            tmp2 = {0, 0};
 //        }
@@ -1574,8 +1588,8 @@
 //                chance--;
 //                random();
 //                print_Random();
-//                load_Font("CHANCE", 920, 350, 150, 70, PURPLE_COLOR);
-//                load_Font(to_string(chance), 975, 410, 40, 70, YELLOW_COLOR);
+//                load_Font("CHANCE", 930, 350, 150, 70, PURPLE_COLOR);
+//                load_Font(to_string(chance), 985, 410, 40, 70, YELLOW_COLOR);
 //            }
 //        }
 //
@@ -1585,8 +1599,8 @@
 //            print_Random();
 //            game_change = false;
 //            chance--;
-//            load_Font("CHANCE", 920, 350, 150, 70, PURPLE_COLOR);
-//            load_Font(to_string(chance), 975, 410, 40, 70, YELLOW_COLOR);
+//            load_Font("CHANCE", 930, 350, 150, 70, PURPLE_COLOR);
+//            load_Font(to_string(chance), 985, 410, 40, 70, YELLOW_COLOR);
 //            first_Check = false;
 //            second_Check = true;
 //        }
@@ -1596,6 +1610,7 @@
 //
 //    if(end_game)
 //    {
+//        //cout << 3 << endl;
 //        push_Score();
 //        print_END();
 //        end_game = false;
@@ -1604,21 +1619,25 @@
 //
 //    if(game_win)
 //    {
+//        //cout << 4 << endl;
 //        print_NEXT_LEVEL();
 //    }
 //
 //    if(game_lose)
 //    {
+//        //cout << 5 << endl;
 //        print_LOSE();
 //    }
 //
 //    if(menu)
 //    {
+//        //cout << 6 << endl;
 //        print_MENU();
 //    }
 //
 //    if(menu_score)
 //    {
+//        //cout << 7 << endl;
 //        SDL_RenderClear(renderer);
 //        print_RANK();
 //        menu_score = false;
@@ -1627,6 +1646,7 @@
 //
 //    if(menu_intro)
 //    {
+//       // cout << 8 << endl;
 //        print_INTRO();
 //        menu_back = true;
 //
@@ -1639,6 +1659,7 @@
 //
 //    if(wait_resume)
 //    {
+//        time_start = SDL_GetTicks() - time_now;
 //        print_Map();
 //        wait_resume = false;
 //        wait = false;
@@ -1656,6 +1677,7 @@
 //    int frameTime;
 //
 //    makeArr();
+//    push_Score();
 //
 //    while(!quit_game)
 //    {

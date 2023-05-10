@@ -4,66 +4,7 @@
 	<ActiveTarget name="Debug" />
 	<File name="main.cpp" open="1" top="1" tabpos="1" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
 		<Cursor>
-			<Cursor1 position="17312" topLine="665" />
+			<Cursor1 position="39002" topLine="1462" />
 		</Cursor>
-	</File>
-	<File name="thuattoan.cpp" open="1" top="0" tabpos="2" split="0" active="1" splitpos="0" zoom_1="-1" zoom_2="0">
-		<Cursor>
-			<Cursor1 position="46364" topLine="466" />
-		</Cursor>
-		<Folding>
-			<Collapse line="75" />
-			<Collapse line="85" />
-			<Collapse line="95" />
-			<Collapse line="117" />
-			<Collapse line="131" />
-			<Collapse line="147" />
-			<Collapse line="156" />
-			<Collapse line="165" />
-			<Collapse line="176" />
-			<Collapse line="199" />
-			<Collapse line="216" />
-			<Collapse line="227" />
-			<Collapse line="233" />
-			<Collapse line="239" />
-			<Collapse line="244" />
-			<Collapse line="282" />
-			<Collapse line="322" />
-			<Collapse line="336" />
-			<Collapse line="344" />
-			<Collapse line="377" />
-			<Collapse line="404" />
-			<Collapse line="450" />
-			<Collapse line="496" />
-			<Collapse line="517" />
-			<Collapse line="541" />
-			<Collapse line="647" />
-			<Collapse line="653" />
-			<Collapse line="661" />
-			<Collapse line="682" />
-			<Collapse line="688" />
-			<Collapse line="694" />
-			<Collapse line="700" />
-			<Collapse line="707" />
-			<Collapse line="724" />
-			<Collapse line="752" />
-			<Collapse line="759" />
-			<Collapse line="765" />
-			<Collapse line="771" />
-			<Collapse line="777" />
-			<Collapse line="784" />
-			<Collapse line="835" />
-			<Collapse line="1219" />
-			<Collapse line="1244" />
-			<Collapse line="1279" />
-			<Collapse line="1296" />
-			<Collapse line="1314" />
-			<Collapse line="1322" />
-			<Collapse line="1332" />
-			<Collapse line="1353" />
-			<Collapse line="1420" />
-			<Collapse line="1430" />
-			<Collapse line="1592" />
-		</Folding>
 	</File>
 </CodeBlocks_layout_file>

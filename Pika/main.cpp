@@ -15,7 +15,6 @@ const int column = 11; // số hàng
 const int FPS = 60;
 const int FRAME_DELAY = 16; // độ trễ
 const int levelMax = 9; // số level tối đa
-const int time_of_level = 600; //thời gian chuẩn mỗi level
 const string WINDOW_TITLE = "PIKACHU";
 
 const SDL_Color CYAN_COLOR = {0, 255, 255};
@@ -54,6 +53,7 @@ const SDL_Rect NEW_LOSE = {410, 502, 280, 96};
 const SDL_Rect QUIT_LOSE = {410, 622, 280, 96};
 
 const SDL_Rect BACK = {90, 90, 150, 60};
+const SDL_Rect TIME = {95, 120, 760, 30};
 
 const SDL_Rect MENU_WIN = {410, 382, 280, 96};
 const SDL_Rect NEW_WIN = {410, 502, 280, 96};
@@ -74,6 +74,10 @@ int score = 0; // Điểm nhận được
 int level = 1; // level bắt đầu
 int sound = 0; // âm thanh đang mở (1 là âm thanh đang tắt)
 int chance = 10; // số lượt thay đổi vị trí Map hiện tại
+
+int time_start = 0;
+int time_now = 0;
+
 int time_level[10] = {0, 600, 620, 640, 660, 680, 700, 720, 740, 760};
 
 //menu
@@ -116,6 +120,7 @@ void reset_Game()
     level = 1;
     sound = 0;
     chance = 10;
+    time_start = SDL_GetTicks();
 
     game = true;
     game_change = false;
@@ -134,8 +139,10 @@ void reset_Game()
 
 void reset_Next_Level()
 {
+    score += (time_level[level] - time_now / 1000) * (2 * level + 5) / 10;
     level += 1;
     chance = min(chance + 1, 10);
+    time_start = SDL_GetTicks();
 
     game = true;
     game_change = false;
@@ -1300,6 +1307,7 @@ void mouse()
             }
             if(return_Mouse(x, y, RESTART_WAIT))
             {
+                push_Score();
                 game = true;
                 new_game = true;
                 first_Check = false;
@@ -1397,7 +1405,6 @@ void mouse()
                 game = true;
                 game_win = false;
             }
-            //if(!game_win) push_Score();
         }
 
 
@@ -1406,21 +1413,22 @@ void mouse()
             if(return_Mouse(x, y, MENU_LOSE))
             {
                 menu = true;
+                game_lose = false;
             }
 
             if(return_Mouse(x, y, NEW_LOSE))
             {
                 new_game = true;
                 game = true;
+                game_lose = false;
             }
 
             if(return_Mouse(x, y, QUIT_LOSE))
             {
                 quit_game = true;
+                game_lose = false;
             }
-            game_lose = false;
         }
-        game_lose = false;
     }
 }
 
@@ -1505,21 +1513,24 @@ void Render()
     {
         //cout << 1 << endl;
         //push_Score();
-        reset_Game();
         makeArr();
+        reset_Game();
         print_Map();
         new_game = false;
     }
 
     if(game)
     {
-        //cout << 2 << endl;
-        if(!new_game)
+        if(!wait) time_now = SDL_GetTicks() - time_start;
+        if(time_level[level] - time_now / 1000 < 0)
         {
-
+            game = false;
+            game_lose = true;
         }
-        //print_Map();
-        if(second_Check && arr[first_Move.x][first_Move.y] * arr[second_Move.x][second_Move.y] > 0)
+        renderTexture("photos/sky.png", TIME.x, TIME.y, TIME.w, TIME.h);
+        renderTexture("photos/time.png", TIME.x, TIME.y, max(0, TIME.w * (time_level[level] - time_now / 1000) / time_level[level]), TIME.h);
+
+        if(game && second_Check && arr[first_Move.x][first_Move.y] * arr[second_Move.x][second_Move.y] > 0)
         {
             if(checkXY(first_Move, second_Move).size() != 0)
             {
@@ -1643,13 +1654,12 @@ void Render()
 
     if(wait)
     {
-        //cout << 9 << endl;
         print_WAIT();
     }
 
     if(wait_resume)
     {
-        //cout << 10 << endl;
+        time_start = SDL_GetTicks() - time_now;
         print_Map();
         wait_resume = false;
         wait = false;
@@ -1667,6 +1677,7 @@ int main(int argc, char* argv[])
     int frameTime;
 
     makeArr();
+    push_Score();
 
     while(!quit_game)
     {
